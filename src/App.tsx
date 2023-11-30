@@ -1,38 +1,44 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
+import moment from "moment";
+import HebrewDatePicker from "./components/Calendar";
+import CustomTimePicker from "./components/TimePicker";
+import { WeekAvailability, weekAvailablity } from "./constants";
+import addDaysToDate from "./components/Calendar/helpers/addDaysToDate";
+import getHebrewDay from "./components/Calendar/helpers/getHebrewDay";
 
+interface SelectedDateState {
+  date: Date | null;
+  day: string;
+  dateOnly: string | undefined;
+  dateFormatted: string | undefined;
+}
 function App() {
-  const [count, setCount] = useState(0);
+  const initDay = getHebrewDay(addDaysToDate(new Date(), 1));
+  const [selectedDate, setSelectedDate] = useState<SelectedDateState>({
+    date: addDaysToDate(new Date(), 1),
+    day: initDay,
+    dateOnly: moment(new Date()).format("YYYY-MM-DD"),
+    dateFormatted: moment(new Date()).format("DD-MM-YYYY"),
+  });
+  useEffect(() => {
+    console.log(selectedDate);
+  }, [selectedDate]);
 
+  const dayOfWeek = selectedDate.day as keyof WeekAvailability;
   return (
-    <div className="App">
-      <div>
-        <a href="https://reactjs.org" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
+    <div dir="rtl" className="App wrapper justify-center">
+      <div className="container flex justify-between">
+        <HebrewDatePicker
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+        />
+        <CustomTimePicker
+          selectedDate={selectedDate.dateFormatted}
+          START_WORK_HOUR={weekAvailablity[dayOfWeek].START_WORK_HOUR}
+          END_WORK_HOUR={weekAvailablity[dayOfWeek].END_WORK_HOUR}
+        />
       </div>
-      <h1>React + Vite</h1>
-      <h2>On CodeSandbox!</h2>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR.
-        </p>
-
-        <p>
-          Tip: you can use the inspector button next to address bar to click on
-          components in the preview and open the code in the editor!
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </div>
   );
 }
